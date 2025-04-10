@@ -1,31 +1,29 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  frontend:
-    build: ./questionnaire-frontend
-    ports:
-      - "3000:80"
-    depends_on:
-      - backend
-    restart: always
-
   backend:
-    build: ./questionnaire-backend
+    build:
+      context: ./questionnaire-backend
     ports:
       - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/questionnaire2
+      - JWT_SECRET=your_secret_key
     depends_on:
       - mongo
-    environment:
-      - MONGO_URI=mongodb://localhost:27017/mernDB
-    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
 
   mongo:
-    image: mongo
+    image: mongo:latest
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
-    restart: always
 
 volumes:
   mongo-data:

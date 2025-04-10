@@ -1,18 +1,12 @@
-# Use Node.js base image
-FROM node:18
+FROM node:16
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package.json package-lock.json ./
+COPY package.json ./
 RUN npm install
 
-# Copy application source
-COPY questionnarie-main\questionnaire-frontend\src\App.js 
+COPY . .
 
-# Expose backend port
 EXPOSE 5000
 
-# Start the server
 CMD ["npm", "start"]

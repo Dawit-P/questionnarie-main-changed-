@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Box } from "@mui/material";
 import Header from "./components/Header";
@@ -9,195 +9,119 @@ import AnswerPage from "./components/AnswerPage";
 import EditQuestion from "./components/EditQuestion";
 import ReportPage from "./components/ReportPage";
 import QuestionnaireDetails from "./components/QuestionnaireDetails";
-import Login from "./components/Login"; // Add Login component
-import Register from "./components/Register"; // Add Register component
-import Profile from "./components/Profile"; // Add Profile component
-import ProtectedRoute from "./ProtectedRoute"; // Add ProtectedRoute component
+import Login from "./components/Login";
+import Register from "./components/Register";
+import Profile from "./components/Profile";
+import ProtectedRoute from "./ProtectedRoute";
 import AdminDashboard from "./components/AdminDashboard";
 import EditQuestionnaire from "./components/EditQuestionnaire";
 import QuestionnaireListOne from "./components/QuestionnaireListOne";
 import OrganizationRegisterPage from "./components/OrganizationRegisterPage";
-import SelectOrganizationAndQuestionnairePage from "./components/SelectOrganizationAndQuestionnairePage"; 
+import SelectOrganizationAndQuestionnairePage from "./components/SelectOrganizationAndQuestionnairePage";
 import QuestionnaireTableView from "./components/QuestionnaireTableView";
 import "bootstrap/dist/css/bootstrap.min.css";
-// src/App.js
-import React, { useEffect, useState } from 'react';
-import { socket } from './socket';
+import { socket as Socket } from "./socket";
 
 function App() {
-  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [isConnected, setIsConnected] = useState(Socket.connected);
 
   useEffect(() => {
-    // Connect to the server
-    socket.connect();
+    Socket.connect();
 
-    // Event listeners
-    function onConnect() {
-      setIsConnected(true);
-    }
+    const onConnect = () => setIsConnected(true);
+    const onDisconnect = () => setIsConnected(false);
 
-    function onDisconnect() {
-      setIsConnected(false);
-    }
+    Socket.on("connect", onConnect);
+    Socket.on("disconnect", onDisconnect);
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-
-    // Cleanup on unmount
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.disconnect();
+      Socket.off("connect", onConnect);
+      Socket.off("disconnect", onDisconnect);
+      Socket.disconnect();
     };
   }, []);
 
   return (
-    <div>
-      <h1>{isConnected ? 'Connected' : 'Disconnected'}</h1>
-      {/* Your component code */}
-    </div>
-  );
-}
-
-export default App;
-
-
-function App() {
-  return (
     <Router>
-      <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <Header />
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/questionnaires/view/:id" element={<QuestionnaireTableView />} />
+      <Header />
+      <Box sx={{ minHeight: "80vh" }}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<QuestionnaireList />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/organization/register" element={<OrganizationRegisterPage />} />
+          <Route path="/questionnaire/:id" element={<QuestionnaireDetails />} />
+          <Route path="/answer/:id" element={<AnswerPage />} />
 
-          
-        {/* Add other routes here */}
-     
-
-            <Route path="/list-one/:questionnaireId" element={<QuestionnaireListOne />} />
-
-            
-           
-
-
-            {/* Protected Routes */}
-             
-            <Route 
-            path="/"
-             element={
-              <ProtectedRoute roles={["admin"]}>  
-             <AdminDashboard/>
-              </ProtectedRoute>
-             } 
-             />
-
-            <Route
-             path="/select-organization-questionnaire"
-             element={
-              <ProtectedRoute roles={["admin"]}>
-             <SelectOrganizationAndQuestionnairePage />
+          {/* Protected Routes */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
-               />
-
-            <Route
-             path="/report/:questionnaireId/organization/:organizationId"
-             element={
-              <ProtectedRoute roles={["admin"]}>
-             <ReportPage />
-             </ProtectedRoute>
-            }
-            />
-            <Route 
-            path="/register-organization" 
+          />
+          <Route
+            path="/admin/dashboard"
             element={
               <ProtectedRoute roles={["admin"]}>
-            <OrganizationRegisterPage />
-            </ProtectedRoute>
-            } 
-            />
-
-
-            <Route
-              path="/create-questionnaire"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <QuestionnaireForm />
-                </ProtectedRoute>
-              }
-            />
-             <Route
-              path="/edit-questionnaire/:questionnaireId"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <EditQuestionnaire />
-                </ProtectedRoute>
-              }
-            />
-         
-            <Route
-              path="/answer/:questionnaireId"
-              element={// <ProtectedRoute roles={["admin","public"]}>
-                  <AnswerPage />
-               // </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/edit/:questionId"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <EditQuestion />
-                </ProtectedRoute>
-              }
-            />
-             {/* <Route 
-                path="/register-organization" 
-                element={
-                  <ProtectedRoute roles={["admin"]}>
-                <OrganizationRegisterPage />
-                </ProtectedRoute>
-                } 
-            /> */}
-            <Route
-              path="/list"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <QuestionnaireList />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/report/:questionnaireId"
-              element={
-                <ProtectedRoute roles={["admin"]}>
-                  <ReportPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/questionnaire/:questionnaireId"
-              element={
-                <ProtectedRoute roles={["admin", "public"]}>
-                  <QuestionnaireDetails />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute roles={["admin", "public"]}>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Box>
-        <Footer />
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/questionnaire/edit/:id"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <EditQuestionnaire />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/questionnaire/create"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <QuestionnaireForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reports"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <ReportPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/questionnaire/table"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <QuestionnaireTableView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/questionnaire/edit-question/:id"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <EditQuestion />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/select-organization"
+            element={
+              <ProtectedRoute>
+                <SelectOrganizationAndQuestionnairePage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
       </Box>
+      <Footer />
     </Router>
   );
 }

@@ -1,5 +1,5 @@
 # Use Node.js base image
-FROM node:18
+FROM node:18 AS build
 
 # Set working directory
 WORKDIR /app
@@ -7,6 +7,8 @@ WORKDIR /app
 # Copy package files and install dependencies
 COPY package.json package-lock.json ./
 RUN npm install
+RUN npm install socket.io-client
+RUN npm install socket.io
 
 # Copy application source
 COPY . .
@@ -16,7 +18,7 @@ RUN npm run build
 
 # Use Nginx to serve the frontend
 FROM nginx:alpine
-COPY --from=0 /app/build /usr/share/nginx/html
+COPY --from=build /app/build /usr/share/nginx/html
 
 # Expose frontend port
 EXPOSE 80

@@ -1,5 +1,6 @@
-const express = require("express");
-const { protect, authorize } = require("../middleware/auth");
+import express from "express";
+import { protect, authorize } from "../middleware/auth.js";
+
 const router = express.Router();
 
 // Admin-only route to create a questionnaire
@@ -22,4 +23,4 @@ router.get("/reports", protect, authorize("admin"), async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

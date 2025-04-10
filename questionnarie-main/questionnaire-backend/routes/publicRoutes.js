@@ -1,5 +1,6 @@
-const express = require("express");
-const { protect } = require("../middleware/auth");
+import express from "express";
+import { protect } from "../middleware/auth.js";
+
 const router = express.Router();
 
 // Public route to submit answers
@@ -12,4 +13,4 @@ router.post("/answer", protect, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
